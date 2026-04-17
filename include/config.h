@@ -44,5 +44,30 @@
 // Uncomment to print raw decoded bits to Serial
 // #define DEBUG_LTC_BITS
 
-// Uncomment to print audio peak levels to Serial
+// Audio peak — superseded by DEBUG_HEARTBEAT (lvl: field). Left for reference.
 // #define DEBUG_AUDIO_LEVEL
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Runtime Diagnostics
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Milliseconds of silence before reporting [!!] LTC LOST
+#define LTC_LOSS_TIMEOUT_MS    1000
+
+// Interval (ms) between [STAT] heartbeat lines
+#define HEARTBEAT_INTERVAL_MS  5000
+
+// Comment out to disable the periodic [STAT] heartbeat line (Tier 2)
+#define DEBUG_HEARTBEAT
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SSD1306 Display
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Display refresh interval — derived from LTC_FRAMERATE so one display update
+// per LTC frame regardless of 24 / 25 / 29.97 / 30.
+// At 1 MHz I2C the full framebuffer transfers in ~10 ms, leaving ample headroom.
+#define DISPLAY_REFRESH_MS  (1000 / LTC_FRAMERATE)
+
+// Comment out to disable the OLED display entirely
+#define ENABLE_DISPLAY

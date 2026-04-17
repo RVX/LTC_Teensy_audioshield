@@ -51,23 +51,25 @@ public:
     // Returns total bits decoded since startup (debug)
     uint32_t getBitsDecoded() const { return _totalBits; }
 
+    // Returns ZC timeout count (signal dropouts) since last resetZcResets().
+    uint32_t getZcResets() const { return _zcResets; }
+    void     resetZcResets()     { _zcResets = 0; }
+
 private:
     // ── Biphase / zero-crossing state ────────────────────────────────────────
-    int16_t  _prevSample;          // last sample from previous block
     float    _samplesPerBit;       // nominal samples per LTC bit
-    float    _halfBit;             // _samplesPerBit / 2.0f
     float    _sampleCount;         // fractional sample counter since last ZC
     int8_t   _polarity;            // current signal polarity (+1 / 0 / -1)
 
     // ── Bit accumulation ─────────────────────────────────────────────────────
     uint8_t  _bitBuffer[80];       // assembled bits (LSB order within byte)
     uint8_t  _bitCount;            // bits received so far
-    bool     _inSync;              // sync word detected
 
     // ── Output ───────────────────────────────────────────────────────────────
     LTCTimecode _timecode;
     bool        _frameReady;
     uint32_t    _totalBits;    // debug counter
+    uint32_t    _zcResets;     // zero-crossing timeout count (signal dropouts)
 
     // ── Internal helpers ─────────────────────────────────────────────────────
     void  _handleCrossing(float intervalSamples);
