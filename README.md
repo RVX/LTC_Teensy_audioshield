@@ -44,17 +44,21 @@ pio device monitor       # Serial monitor (115200 baud)
 The 128×64 display is divided into five zones:
 
 ```
-┌─────────────────────────────┐
-│  00:01:23:15                │  ← timecode HH:MM:SS:FF (size 2)
-│  ▶ LTC:OK  ████████░░░░░░░  │  ← status + input level bar
-│─────────────────────────────│
-│  > LTC acquired             │
-│  > skip +1 @ 00:01:23:00    │  ← 3-line event log
-│  > TC jump +3600f           │
-│─────────────────────────────│
-│  m:6(pk:8)/32 z:0 c:12%     │  ← memory / ZC errors / CPU
-└─────────────────────────────┘
+┌────────────────────────────────┐
+│  00:01:23:15  (or NO LTC IN)   │  ← row 0 (yellow zone, size-2)
+│  ▶ LTC:OK  ████████░░░░░░░     │  ← row 1: status + level bar
+│────────────────────────────────│
+│  > LTC acquired                │
+│  > skip +1 @ 00:01:23:00       │  ← 3-line scrolling event log
+│  > TC jump +3600f              │
+│────────────────────────────────│
+│  m:6/32 z:0 c:12%              │  ← stat: memory / ZC errors / CPU
+└────────────────────────────────┘
 ```
+
+**No signal:** row 0 shows a full-width inverted white bar with `NO LTC IN` in large black text (size-2, centered).
+
+**Signal present:** row 0 shows the live timecode `HH:MM:SS:FF` (or `HH:MM:SS;FF` for drop-frame) — all digits on the same baseline.
 
 - Play triangle **▶** blinks each frame when LTC is present; solid **■** when no signal.
 - The level bar reflects the real-time LINE IN peak amplitude.
