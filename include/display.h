@@ -69,10 +69,7 @@ public:
         // Shift lines up
         for (uint8_t i = 0; i < DISP_MSG_LINES - 1; ++i)
             memcpy(_msgBuf[i], _msgBuf[i + 1], sizeof(_msgBuf[0]));
-        size_t len = strlen(msg);
-        if (len >= sizeof(_msgBuf[0])) len = sizeof(_msgBuf[0]) - 1;
-        memcpy(_msgBuf[DISP_MSG_LINES - 1], msg, len);
-        _msgBuf[DISP_MSG_LINES - 1][len] = '\0';
+        snprintf(_msgBuf[DISP_MSG_LINES - 1], sizeof(_msgBuf[0]), "%s", msg);
     }
 
     // ── Render — call every loop() ────────────────────────────────────────────
@@ -89,22 +86,27 @@ public:
         _display.setTextColor(SSD1306_WHITE);
         _display.setTextSize(2);
         {
-            char tc[12];
             if (_tcPresent) {
+                char tc[13];
                 snprintf(tc, sizeof(tc), "%02u:%02u:%02u%c%02u",
                          (unsigned)(_hh % 24), (unsigned)(_mm % 60),
                          (unsigned)(_ss % 60), _dfFlag ? ';' : ':',
-                         (unsigned)(_ff % 100));
+                         (unsigned)(_ff % LTC_FRAMERATE));
+                int16_t cx = 0;
+                for (uint8_t i = 0; tc[i]; ++i) {
+                    _display.setCursor(cx, 0);
+                    _display.write((uint8_t)tc[i]);
+                    cx += 11;
+                }
             } else {
-                strcpy(tc, "--:--:--:--");
-            }
-            int16_t cx = 0;
-            for (uint8_t i = 0; tc[i]; ++i) {
-                // separator and frame digits sit 2px lower
-                int16_t cy = (i >= 8) ? 2 : 0;
-                _display.setCursor(cx, cy);
-                _display.write((uint8_t)tc[i]);
-                cx += 11;
+                // Full-width inverted bar — yellow zone only (y=0..15)
+                // "NO LTC IN" = 9 chars × 12px = 108px, centered → x=10
+                _display.fillRect(0, 0, OLED_WIDTH, 16, SSD1306_WHITE);
+                _display.setTextSize(2);
+                _display.setTextColor(SSD1306_BLACK);
+                _display.setCursor((OLED_WIDTH - 9 * 12) / 2, 1);
+                _display.print("NO LTC IN");
+                _display.setTextColor(SSD1306_WHITE);
             }
         }
 
@@ -123,10 +125,12 @@ public:
         _display.print(_ltcOK ? "LTC:OK" : "LTC:--");
 
         // Level bar: remaining width to right edge
-        uint8_t barW = (uint8_t)(_level * 74.0f);
-        if (barW > 74) barW = 74;
-        _display.drawRect(52, 18, 76, 5, SSD1306_WHITE);
-        if (barW > 0) _display.fillRect(53, 19, barW, 3, SSD1306_WHITE);
+        {
+            uint8_t barW = (uint8_t)(_level * 74.0f);
+            if (barW > 74) barW = 74;
+            _display.drawRect(52, 18, 76, 5, SSD1306_WHITE);
+            if (barW > 0) _display.fillRect(53, 19, barW, 3, SSD1306_WHITE);
+        }
 
         // divider line
         _display.drawFastHLine(0, 25, OLED_WIDTH, SSD1306_WHITE);

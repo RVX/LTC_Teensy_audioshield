@@ -198,7 +198,8 @@ void loop()
                     {
                         char dmsg[22];
                         snprintf(dmsg, sizeof(dmsg), "JUMP->%02u:%02u:%02u:%02u",
-                            tc.hours, tc.minutes, tc.seconds, tc.frames);
+                            tc.hours % 24, tc.minutes % 60,
+                            tc.seconds % 60, tc.frames % LTC_FRAMERATE);
                         ltcDisplay.pushMessage(dmsg);
                     }
 #endif
